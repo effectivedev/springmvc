@@ -12,5 +12,6 @@
   </head>
   <body>
   ${param.test}
+  ${header}
   </body>
 </html>
