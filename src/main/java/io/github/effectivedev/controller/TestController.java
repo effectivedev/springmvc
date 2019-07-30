@@ -1,8 +1,10 @@
 package io.github.effectivedev.controller;
 
 
+import io.github.effectivedev.annotation.GoGo;
 import io.github.effectivedev.service.TestService;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,12 @@ public class TestController {
     public String test() {
         testService.testService();
         return "Hello World";
+    }
+    @GoGo
+    @ResponseBody
+    @GetMapping
+    public String gogogo(){
+        return "go";
     }
 
     @GetMapping("/")

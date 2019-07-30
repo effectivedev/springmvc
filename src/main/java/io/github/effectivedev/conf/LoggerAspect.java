@@ -5,6 +5,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @EnableAspectJAutoProxy
 public class LoggerAspect {
+    @Order(PriorityOrdered.HIGHEST_PRECEDENCE)
     @Around("execution(* io.github.effectivedev.controller.*.*(..)) || execution(* io.github.effectivedev.service.*.*(..)) || execution(* io.github.effectivedev.repository.*.*(..))")
     public Object calculatePerformanceTime(ProceedingJoinPoint proceedingJoinPoint) {
         Object result = null;
@@ -31,18 +34,17 @@ public class LoggerAspect {
             result = proceedingJoinPoint.proceed();
             long end = System.currentTimeMillis();
 
-            log.info("Execution Time : {}", (end - start));
+            log.info("     {}'s Execution Time : {}", signatureShort, (end - start));
         } catch (Throwable throwable) {
             log.error("exception! ");
         }
         log.info("{} [{}] {}", type.getEnd(), type.getName(), signatureShort);
         return result;
     }
-
     private enum ANNOTATION_TYPE {
-        CONTROLLER("Controller", ">  ", "<  "),
-        SERVICE("Service", ">> ", "<< "),
-        REPOSITORY("Repository", ">>>", "<<<"),
+        CONTROLLER("Controller", "=>  ", "<=  "),
+        SERVICE("Service", "==> ", "<== "),
+        REPOSITORY("Repository", "===>", "<==="),
         ETC("Etc", "", "");
         final private String name;
         final private String start;
@@ -53,7 +55,6 @@ public class LoggerAspect {
             this.start = start;
             this.end = end;
         }
-
         public String getName() {
             return name;
         }
@@ -65,6 +66,19 @@ public class LoggerAspect {
         public String getEnd() {
             return end;
         }
+    }
+    @Order(PriorityOrdered.LOWEST_PRECEDENCE)
+    @Around("@annotation(io.github.effectivedev.annotation.GoGo)")
+    public Object annotationTest(ProceedingJoinPoint proceedingJoinPoint){
+        Object result = null;
+        log.info("@gogogo start: {}", proceedingJoinPoint.getSignature());
+        try {
+            result = proceedingJoinPoint.proceed();
+        } catch (Throwable throwable) {
+            log.error(throwable.getMessage());
+        }
+        log.info("@gogogo end: {}", proceedingJoinPoint.getSignature());
+        return result;
     }
 }
 
